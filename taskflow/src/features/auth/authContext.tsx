@@ -1,13 +1,16 @@
-import { createContext, useReducer, useMemo } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useReducer, useMemo, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { authReducer, initialState } from './authReducer';
 import type { AuthState, AuthAction } from './authReducer';
 
 // Create the AuthContext
-const AuthContext = createContext<{
+export type AuthContextType = {
   state: AuthState;
   dispatch: React.Dispatch<AuthAction>;
-} | null>(null);
+};
+
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
@@ -16,4 +19,12 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
